@@ -77,25 +77,29 @@ elseif pawsDone > 0
     end
 end
 
-
-% This is the whole LED section. The paws finding algorithm needs to know
-% this information to search more accurately.
-if ledsDone < numIn
-    for k = ledsDone + 1:numIn;
-        if 100*k/numIn >= nextGoal
-            disp(strcat(['LEDs are ',num2str(nextGoal),'% Processed']));
-            nextGoal = nextGoal + 10;
-        end
-        [Images(:,:,:,k),theseLeds] = FindLeds(Images(:,:,:,k), ...
+if ~Params{3}
+    % This is the whole LED section. The paws finding algorithm needs to know
+    % this information to search more accurately.
+    if ledsDone < numIn
+        for k = ledsDone + 1:numIn;
+            if 100*k/numIn >= nextGoal
+                disp(strcat(['LEDs are ',num2str(nextGoal),'% Processed']));
+                nextGoal = nextGoal + 10;
+            end
+            [Images(:,:,:,k),theseLeds] = FindLeds(Images(:,:,:,k), ...
             ledRadius,colorChan(1));
-        ledCenters = AddLeds(k,ledCenters,theseLeds,ledRadius,Images(:,:,:,k));
+            ledCenters = AddLeds(k,ledCenters,theseLeds,ledRadius,Images(:,:,:,k));
+        end
     end
+    if earlyQuit == 1
+        return
+    end
+    linDisp = ledAnalyze(ledCenters);
+    lowestRow = max(max(ledCenters(:,1)));
+else
+    linDisp = 1;
+    lowestRow = 1;
 end
-if earlyQuit == 1
-    return
-end
-linDisp = ledAnalyze(ledCenters);
-lowestRow = max(max(ledCenters(:,1)));
 % We assume that the LEDs found the same low row for our purposes
 if alreadyOffset
     Zeros = pawCenters(:,1,pawsDone) == 0;

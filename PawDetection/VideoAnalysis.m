@@ -61,6 +61,12 @@ function [ varargout ] = VideoAnalysis( Frames,varargin )
 %   unmodified movie; ledCenters: the array of the coordinates of the LEDs
 %   in every frame; pawCenters: the array of the coordinates of the paws in
 %   every frame.
+% 
+%   Params
+%       Params{1} = bght_thresh;
+%       Params{2} = cRatios;
+%       Params{3} = skipLEDs;  
+%
 
 % First we parse the optional inputs.
 if ~mod(nargin,2)
@@ -85,7 +91,12 @@ for k = 1:Bound
         varVal = Frames.(varName);
     else
         varName = cell2mat(varargin(2*k-1));
-        varVal = cell2mat(varargin(2*k));
+        try
+            varVal = cell2mat(varargin(2*k));
+        catch
+            varVal = varargin(2*k);
+            varVal = varVal{1}
+        end
     end
     switch varName
         case 'colorChan'
