@@ -125,6 +125,7 @@ if pawsDone < numIn
         % This simple 'if' clause is used to find the most likely candidates
         % for paws in this image.
         if resetCol == 1
+            disp('RAN RESETCOL')
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
                 FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp);
             if ~Initialize
@@ -137,6 +138,7 @@ if pawsDone < numIn
                 end
             end
         else
+            disp(strcat(['on ',num2str(k),'th image']))
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
                 FindPaw(Image,pawRadius,colorChan(2), ...
                 resetCol,k,pawCenters,linDisp,cRatios,bght_thresh);

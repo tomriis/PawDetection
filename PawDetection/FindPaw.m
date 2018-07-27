@@ -18,7 +18,7 @@ addIfUp = 100;
 ImSize = size(Image);
 ImSize(3) = [];
 midCol = ImSize(2)/2;
-if ImNum > 1
+if ImNum < 1
     UsePC = logical(mean2(pawCenters(:,:,ImNum-1)));
 else
     UsePC = 0;

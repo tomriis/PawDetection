@@ -95,7 +95,7 @@ for k = 1:Bound
             varVal = cell2mat(varargin(2*k));
         catch
             varVal = varargin(2*k);
-            varVal = varVal{1}
+            varVal = varVal{1};
         end
     end
     switch varName
