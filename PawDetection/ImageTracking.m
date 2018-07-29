@@ -98,7 +98,7 @@ if ~Params{3}
     lowestRow = max(max(ledCenters(:,1)));
 else
     linDisp = 1;
-    lowestRow = 1;
+    lowestRow = 100;
 end
 % We assume that the LEDs found the same low row for our purposes
 if alreadyOffset

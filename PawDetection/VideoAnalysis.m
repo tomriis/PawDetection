@@ -188,7 +188,7 @@ if earlyQuit
     return
 end
 
-pawCenters = ManualPlace(Images,pawCenters,numAn);
+%pawCenters = ManualPlace(Images,pawCenters,numAn);
 FauxPCs = InterpolatePaws(pawCenters);
 save('R08170817_1_1000','ledCenters','pawCenters','FauxPCs');
 
@@ -196,8 +196,7 @@ InnerCylinderDiam = 53.80; % cm
 ledDiam = 0.55; % cm
 ArcLength = 36.6; % cm
 
-[CylVel,RatVel,CentersOfMass] = AnalyzeCens(InnerCylinderDiam,...
-    ledDiam,ArcLength,FauxPCs,ledCenters,numAn);
+[Data] = AnalyzeCens(FauxPCs,ledCenters,numAn);
 
 
 
