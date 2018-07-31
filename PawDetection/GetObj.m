@@ -17,7 +17,7 @@ Inds = [centerPoint(1) - Rad(1); centerPoint(1) + Rad(1); ...
 tooSmall = Inds < 1;
 Inds(tooSmall) = 1;
 if Inds(2) > imSize(1)
-    Inds(2) = imsSize(2);
+    Inds(2) = imSize(2);
 end
 if Inds(4) > imSize(2)
     Inds(4) = imSize(2);

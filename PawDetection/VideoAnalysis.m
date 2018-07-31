@@ -61,6 +61,12 @@ function [ varargout ] = VideoAnalysis( Frames,varargin )
 %   unmodified movie; ledCenters: the array of the coordinates of the LEDs
 %   in every frame; pawCenters: the array of the coordinates of the paws in
 %   every frame.
+% 
+%   Params
+%       Params{1} = bght_thresh;
+%       Params{2} = cRatios;
+%       Params{3} = skipLEDs;  
+%
 
 % First we parse the optional inputs.
 if ~mod(nargin,2)
@@ -85,7 +91,12 @@ for k = 1:Bound
         varVal = Frames.(varName);
     else
         varName = cell2mat(varargin(2*k-1));
-        varVal = cell2mat(varargin(2*k));
+        try
+            varVal = cell2mat(varargin(2*k));
+        catch
+            varVal = varargin(2*k);
+            varVal = varVal{1};
+        end
     end
     switch varName
         case 'colorChan'
@@ -127,7 +138,7 @@ if ~exist('Output','var')
     Output = 'struct';
 end
 if ~exist('Params','var')
-    Params = 0;
+    Params = {0,0,0};
 end
 
 % The user has the option of inputting a directory of the images, or a
@@ -177,7 +188,7 @@ if earlyQuit
     return
 end
 
-pawCenters = ManualPlace(Images,pawCenters,numAn);
+%pawCenters = ManualPlace(Images,pawCenters,numAn);
 FauxPCs = InterpolatePaws(pawCenters);
 save('R08170817_1_1000','ledCenters','pawCenters','FauxPCs');
 
@@ -185,8 +196,7 @@ InnerCylinderDiam = 53.80; % cm
 ledDiam = 0.55; % cm
 ArcLength = 36.6; % cm
 
-[CylVel,RatVel,CentersOfMass] = AnalyzeCens(InnerCylinderDiam,...
-    ledDiam,ArcLength,FauxPCs,ledCenters,numAn);
+[Data] = AnalyzeCens(FauxPCs,ledCenters,numAn);
 
 
 

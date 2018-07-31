@@ -77,25 +77,29 @@ elseif pawsDone > 0
     end
 end
 
-
-% This is the whole LED section. The paws finding algorithm needs to know
-% this information to search more accurately.
-if ledsDone < numIn
-    for k = ledsDone + 1:numIn;
-        if 100*k/numIn >= nextGoal
-            disp(strcat(['LEDs are ',num2str(nextGoal),'% Processed']));
-            nextGoal = nextGoal + 10;
-        end
-        [Images(:,:,:,k),theseLeds] = FindLeds(Images(:,:,:,k), ...
+if ~Params{3}
+    % This is the whole LED section. The paws finding algorithm needs to know
+    % this information to search more accurately.
+    if ledsDone < numIn
+        for k = ledsDone + 1:numIn;
+            if 100*k/numIn >= nextGoal
+                disp(strcat(['LEDs are ',num2str(nextGoal),'% Processed']));
+                nextGoal = nextGoal + 10;
+            end
+            [Images(:,:,:,k),theseLeds] = FindLeds(Images(:,:,:,k), ...
             ledRadius,colorChan(1));
-        ledCenters = AddLeds(k,ledCenters,theseLeds,ledRadius,Images(:,:,:,k));
+            ledCenters = AddLeds(k,ledCenters,theseLeds,ledRadius,Images(:,:,:,k));
+        end
     end
+    if earlyQuit == 1
+        return
+    end
+    linDisp = ledAnalyze(ledCenters);
+    lowestRow = max(max(ledCenters(:,1)));
+else
+    linDisp = 1;
+    lowestRow = 100;
 end
-if earlyQuit == 1
-    return
-end
-linDisp = ledAnalyze(ledCenters);
-lowestRow = max(max(ledCenters(:,1)));
 % We assume that the LEDs found the same low row for our purposes
 if alreadyOffset
     Zeros = pawCenters(:,1,pawsDone) == 0;
@@ -121,6 +125,7 @@ if pawsDone < numIn
         % This simple 'if' clause is used to find the most likely candidates
         % for paws in this image.
         if resetCol == 1
+            disp('RAN RESETCOL')
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
                 FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp);
             if ~Initialize
@@ -133,6 +138,7 @@ if pawsDone < numIn
                 end
             end
         else
+            disp(strcat(['on ',num2str(k),'th image']))
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
                 FindPaw(Image,pawRadius,colorChan(2), ...
                 resetCol,k,pawCenters,linDisp,cRatios,bght_thresh);
@@ -149,6 +155,7 @@ if pawsDone < numIn
         % from which to draw information. Otherwise, we'll just keep
         % advancing through the frames until all four paws are finally
         % down.
+        disp(strcat('Value of Initialize ',' ',num2str(Initialize)));
         if Initialize
             % Now we have to identify which paws are which. We have a good hint
             % already if the paw showed up in the place that we would expect it to
@@ -163,9 +170,15 @@ if pawsDone < numIn
                 pawCenters = ManualPlace(Images,pawCenters,k,offset);
             end
             if Disaster
+                disp('Disaster Invoked')
                 k = k - 1;
                 resetCol = 1;
                 numIts = numIts + 1;
+                if numIts > 5
+                    resetCol = 0;
+                    k = k + 1;
+                    numIts=1;
+                end
             end
             if Counter == 0
                 bestMean = [median(meanMax),max(meanMax)];
@@ -196,7 +209,7 @@ end
 pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) = pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) + lowestRow;
 pawCenters(Zeros) = 0;
 
-clc
+%clc
 disp('Files are 100% Processed');
 
 clear Params;
