@@ -111,9 +111,28 @@ tempInfo(thisEntInds,lastIndexOn+5) = percInsert;
 % those rows look nothing like any of the paws. The improved indexing
 % system fixes this problem, I think.
 % tempInfo(4-numUp + 1:end,6:9) = 0;
-
+ IndsLeft = thisIm(:,1) == 0;
+    lastKnown = lastIm(:,5);
+    alreadyKnown = logical(lastKnown);
+    passLabel = (IndsLeft + alreadyKnown) == 2;
+    thisIm(passLabel,5) = lastKnown(passLabel);
+    return
 Confidences = matchDists(cumulativeDists,lastIndexOn);
+if size(Confidences,2) < 4
+   thisIm(:,1:2) = TotalManual(Image);
+   IndsLeft = thisIm(:,1) == 0;
+    lastKnown = lastIm(:,5);
+    alreadyKnown = logical(lastKnown);
+    passLabel = (IndsLeft + alreadyKnown) == 2;
+    thisIm(passLabel,5) = lastKnown(passLabel);
 
+% Now that those are labelled, we'll move onto the ones that need a first
+% label.
+newLabel = (IndsLeft + (thisIm(:,5)==0)) == 2;
+thisIm(newLabel,5) = ImNum-1;
+return
+    
+end
 % Put the correct finds into the right category. I think this statement
 % will subsitute the commented loops hereafter--the problem was putting the
 % rows in order into the output rows; I'm pretty sure logical indexing
@@ -155,6 +174,7 @@ thisIm(BlankPaws,:) = 0;
 % zeros in the last frame. So this code runs to see if we can assign it to
 % something that has just been zeroes.
 % rowsLeft = ~Indices(thisEntInds);
+try
 leftoverRows = sum(UsefulRows > 0);
 use2search = UsefulRows(UsefulRows > 0);
 if NumToFind
@@ -164,6 +184,9 @@ if NumToFind
             thisIm = searchFor(Prediction,Propose,thisIm);
         end
     end
+end
+catch 
+    disp('FAILED THIS BLOCK YALL HEYYY')
 end
 % Reset after adding in found paws.
 % I'm pretty sure all this code has to do is update the fifth column. This

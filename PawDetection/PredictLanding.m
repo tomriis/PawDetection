@@ -14,7 +14,7 @@ if num2predict
     end
 end
 Prediction = zeros(4,5);
-
+return
 if num2predict
     tau = 15;
     % [constant,ahead of paired front paw; constant, ahead of paired back

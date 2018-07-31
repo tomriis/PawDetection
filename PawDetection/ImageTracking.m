@@ -155,7 +155,7 @@ if pawsDone < numIn
         % from which to draw information. Otherwise, we'll just keep
         % advancing through the frames until all four paws are finally
         % down.
-        disp(strcat('Value of Initialize ',' ',num2str(Initialize)));
+
         if Initialize
             % Now we have to identify which paws are which. We have a good hint
             % already if the paw showed up in the place that we would expect it to
