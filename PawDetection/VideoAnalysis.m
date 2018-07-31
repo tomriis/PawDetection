@@ -138,7 +138,7 @@ if ~exist('Output','var')
     Output = 'struct';
 end
 if ~exist('Params','var')
-    Params = 0;
+    Params = {0,0,0};
 end
 
 % The user has the option of inputting a directory of the images, or a

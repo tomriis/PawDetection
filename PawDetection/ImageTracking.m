@@ -155,6 +155,7 @@ if pawsDone < numIn
         % from which to draw information. Otherwise, we'll just keep
         % advancing through the frames until all four paws are finally
         % down.
+        disp(strcat('Value of Initialize ',' ',num2str(Initialize)));
         if Initialize
             % Now we have to identify which paws are which. We have a good hint
             % already if the paw showed up in the place that we would expect it to
@@ -169,9 +170,15 @@ if pawsDone < numIn
                 pawCenters = ManualPlace(Images,pawCenters,k,offset);
             end
             if Disaster
+                disp('Disaster Invoked')
                 k = k - 1;
                 resetCol = 1;
                 numIts = numIts + 1;
+                if numIts > 5
+                    resetCol = 0;
+                    k = k + 1;
+                    numIts=1;
+                end
             end
             if Counter == 0
                 bestMean = [median(meanMax),max(meanMax)];
@@ -202,7 +209,7 @@ end
 pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) = pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) + lowestRow;
 pawCenters(Zeros) = 0;
 
-clc
+%clc
 disp('Files are 100% Processed');
 
 clear Params;

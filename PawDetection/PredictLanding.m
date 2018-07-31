@@ -8,7 +8,7 @@ lastPoints = pointArray(:,:,ImNum - 1);
 Inds2predict = lastPoints(:,1) == 0;
 num2predict = sum(Inds2predict);
 if num2predict
-    reallyThere = mean2(lastPoints);
+    reallyThere = mean2(lastPoints(:,1));
     if ~reallyThere
         num2predict = 0;
     end
