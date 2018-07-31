@@ -97,7 +97,7 @@ if ~Params{3}
     linDisp = ledAnalyze(ledCenters);
     lowestRow = max(max(ledCenters(:,1)));
 else
-    linDisp = 1;
+    linDisp = ones(1,numIn);
     lowestRow = 100;
 end
 % We assume that the LEDs found the same low row for our purposes

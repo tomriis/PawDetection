@@ -18,7 +18,7 @@ addIfUp = 100;
 ImSize = size(Image);
 ImSize(3) = [];
 midCol = ImSize(2)/2;
-if ImNum < 1
+if ImNum > 1
     UsePC = logical(mean2(pawCenters(:,:,ImNum-1)));
 else
     UsePC = 0;
@@ -81,6 +81,7 @@ if UsePC
     rowCVec = adjRows(lastPaws,midCol);
     expPaws(:,1) = expPaws(:,1) - Box(1,1) + rowCVec;
     expPaws(Zeros) = 0;
+    expPaws = 0;
 else
     UseImage = Image;
     notOne = 0;
