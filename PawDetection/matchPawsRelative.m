@@ -36,11 +36,11 @@ function [pawCenters] = matchByDistance(pawCenters, k, argFourPaws)
         end
     end
     downPawsI = 1:4;
-    downPaws = pawCenter(:,1) > 0 || pawCenter(:,2) > 0;
+    downPaws = sum(pawCenter(:,1) > 0) || sum(pawCenter(:,2) > 0);
     downPawsI = downPawsI(downPaws);
     
-    for i=1:size(downPawsI)
-        distances = abs(matchTo - pawCenter(downPawsI(i),:));
+    for i=1:size(downPawsI,2)
+        distances = sum(abs(matchTo(:,1:2) - pawCenter(downPawsI(i),1:2)),2);
         [~, argmin] = min(distances);
         pawCenters(argmin,:,k) = pawCenter(downPawsI(i),:);
     end
