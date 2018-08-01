@@ -67,7 +67,7 @@ if UsePC
     if tooBig(2)
         Box(2,2) = ImSize(2);
     end
-    Box(1,1) = 50;
+    Box(1,1) = 50; % TODO: create manual step to isolate appropriate search area
     Box(1,2) = 380;
     Box(2,1) = 1;
     Box(2,2) = 470;

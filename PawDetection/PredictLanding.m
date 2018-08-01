@@ -14,7 +14,6 @@ if num2predict
     end
 end
 Prediction = zeros(4,5);
-return
 if num2predict
     tau = 15;
     % [constant,ahead of paired front paw; constant, ahead of paired back
@@ -22,7 +21,7 @@ if num2predict
     % of forward paw; multiple of start distance of back paw.
     PixelsForward = [150,1.2;150,1];
     PixFor = PixelsForward;
-    
+
     PairIndex = [1,2,1;2,1,1;3,4,2;4,3,2];
     
     lastKnownInd = lastPoints(:,5);
