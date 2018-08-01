@@ -1,7 +1,6 @@
 function ShowPawPlacement(Images, pawCenters, imNum)
     pawPoints = cell(1,4);
     pawLabel={'FL','FR','BL','BR'};
-    
     h = figure; 
     set(h,'KeyPressFcn',@KeyPressCb);
     imshow(Images(:,:,:,imNum)); hold on;
