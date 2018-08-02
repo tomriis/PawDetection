@@ -23,27 +23,17 @@ end
 
 function [pawCenters] = matchByDistance(pawCenters, k, argFourPaws)
     pawCenter = pawCenters(:,:,k);
-    before = argFourPaws(argFourPaws < k);
-    after = argFourPaws(argFourPaws > k);
-    if isempty(before)
-        matchTo = pawCenters(:,:, after(1));
-    elseif isempty(after)
-        matchTo = pawCenters(:,:,before(end));
-    else
-        if k-before(end) < after(1)-k
-            matchTo = pawCenters(:,:,before(end));
-        else
-            matchTo = pawCenters(:,:,after(1));
-        end
-    end
     downPawsI = 1:4;
     downPaws = and(pawCenter(:,1) > 0,pawCenter(:,2));
     downPawsI = downPawsI(downPaws);
     pawCenters(downPawsI,:, k) = 0;
     
+    distances = zeros(4, size(argFourPaws,2));
     for i=1:size(downPawsI,2)
-        distances = sum(abs(matchTo(:,1:2) - pawCenter(downPawsI(i),1:2)),2);
-        [~, argmin] = min(distances);
+        for j = 1:size(argFourPaws,2)
+            distances(:,j) = sum(abs(pawCenters(:,1:2,argFourPaws(j)) - pawCenter(downPawsI(i),1:2)),2);
+        end
+        [~, argmin] = min(sum(distances,2));
         pawCenters(argmin,:,k) = pawCenter(downPawsI(i),:);
     end
 end
@@ -65,14 +55,6 @@ function [TrBrBlTl] = findRelativePositions(pawCenters)
             else
                 TrBrBlTl(3,:) = pawCenters(i,:);
             end
-        end
-    end
-end
-
-function pawCenter = zeroDuplicatePoint(pawCenter)
-    for i = 1:4
-        if sum(~sum(pawCenter(:,1:2)-pawCenter(i,1:2), 2)) > 1
-            pawCenter(i,:) = 0;
         end
     end
 end

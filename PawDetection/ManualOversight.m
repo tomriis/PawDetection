@@ -14,6 +14,11 @@ function KeyPressCb(hObject,evnt,Images, pawCenters)
     elseif strcmp(evnt.Key,'space')==1
  
     end
-    disp(strcat('Viewing image--',num2str(hObject.UserData(end))))
-    pawPoints = ShowPawPlacement(Images, pawCenters, hObject.UserData(end));
+    
+    if hObject.UserData(end) < 1 || hObject.UserData(end) > size(Images,4)
+        disp('End of Images')
+    else
+        disp(strcat('Viewing image--',num2str(hObject.UserData(end))))
+        pawPoints = ShowPawPlacement(Images, pawCenters, hObject.UserData(end));
+    end
 end
