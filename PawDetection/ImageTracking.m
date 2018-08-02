@@ -97,7 +97,7 @@ if ~Params{3}
     linDisp = ledAnalyze(ledCenters);
     lowestRow = max(max(ledCenters(:,1)));
 else
-    linDisp = 1;
+    linDisp = ones(1,numIn);
     lowestRow = 100;
 end
 % We assume that the LEDs found the same low row for our purposes
@@ -125,7 +125,6 @@ if pawsDone < numIn
         % This simple 'if' clause is used to find the most likely candidates
         % for paws in this image.
         if resetCol == 1
-            disp('RAN RESETCOL')
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
                 FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp);
             if ~Initialize
@@ -138,7 +137,7 @@ if pawsDone < numIn
                 end
             end
         else
-            disp(strcat(['on ',num2str(k),'th image']))
+            disp(strcat(['On ','image ', num2str(k)]))
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
                 FindPaw(Image,pawRadius,colorChan(2), ...
                 resetCol,k,pawCenters,linDisp,cRatios,bght_thresh);
@@ -155,7 +154,6 @@ if pawsDone < numIn
         % from which to draw information. Otherwise, we'll just keep
         % advancing through the frames until all four paws are finally
         % down.
-        disp(strcat('Value of Initialize ',' ',num2str(Initialize)));
         if Initialize
             % Now we have to identify which paws are which. We have a good hint
             % already if the paw showed up in the place that we would expect it to
@@ -208,6 +206,7 @@ else
 end
 pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) = pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) + lowestRow;
 pawCenters(Zeros) = 0;
+pawCenters = matchPawsRelative(Images, pawCenters);
 
 %clc
 disp('Files are 100% Processed');

@@ -35,9 +35,6 @@ resetPawIDs = 0;
 firstFrame = 0;
 numVisPaws = sum(thesePoints(:,1) > 0);
 if ImNum == 1
-    if numVisPaws < 4
-        error('There are fewer than 4 paws in the first frame. This is not supported');
-    end
     firstFrame = 1;
 else
     if mean2(pawCenters(:,:,ImNum-1)) == 0
@@ -61,12 +58,6 @@ pawCenters = AddInfo(pawCenters,Radius,Image,ImNum,numVisPaws);
 % all four paws be present in the image to guarantee accuracy.
 if resetPawIDs
     pawCenters(:,:,ImNum) = UseStats(pawCenters(:,:,ImNum),Image);
-end
-
-if ~firstFrame
-    Prediction = PredictLanding(pawCenters,ImNum);
-    lastIm = pawCenters(:,:,ImNum-1);
-    pawCenters(:,:,ImNum) = matchPaws(pawCenters(:,:,ImNum),lastIm,Image,ImNum,Prediction,resetCol);
 end
 
 resetCol = 0;
