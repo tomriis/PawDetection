@@ -206,7 +206,7 @@ else
 end
 pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) = pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) + lowestRow;
 pawCenters(Zeros) = 0;
-pawCenters = matchPawsRelative(Images, pawCenters);
+pawCenters = matchPawsRelative(pawCenters);
 
 %clc
 disp('Files are 100% Processed');

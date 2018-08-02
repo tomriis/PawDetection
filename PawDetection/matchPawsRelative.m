@@ -1,17 +1,18 @@
-function [pawCenters] = matchPawsRelative(Images, pawCenters)
+function [pawCenters] = matchPawsRelative(pawCenters)
     argFourPaws = [];
-    for k = 1:size(Images,4)
+    for k = 1:size(pawCenters,3)
         numPawsFound = sum(pawCenters(:,1,k)>0 & pawCenters(:,2,k)>0);
         if numPawsFound == 4
                 relativePositions = findRelativePositions(pawCenters(:,:,k));
-                 %relativePositions = [Top Right; Bottom Right; Bottom Left; Top Left]
-                 %Paws = ['FR';'FL';'BL';'BR'];
+                %relativePositions = [Top Right; Bottom Right; Bottom Left; Top Left]
+                %Paws = ['FR';'FL';'BL';'BR'];
                 mapping = [4, 3, 2, 1]; 
                 pawCenters(:,:,k) = relativePositions(mapping,:);
                 argFourPaws(end+1) = k;
         end
     end
-    for k = 1:size(Images,4)
+    
+    for k = 1:size(pawCenters,3)
         numPawsFound = sum(pawCenters(:,1,k)>0 & pawCenters(:,2,k)>0);
         if numPawsFound < 4
             pawCenters = matchByDistance(pawCenters, k, argFourPaws);
@@ -36,8 +37,9 @@ function [pawCenters] = matchByDistance(pawCenters, k, argFourPaws)
         end
     end
     downPawsI = 1:4;
-    downPaws = sum(pawCenter(:,1) > 0) || sum(pawCenter(:,2) > 0);
+    downPaws = and(pawCenter(:,1) > 0,pawCenter(:,2));
     downPawsI = downPawsI(downPaws);
+    pawCenters(downPawsI,:, k) = 0;
     
     for i=1:size(downPawsI,2)
         distances = sum(abs(matchTo(:,1:2) - pawCenter(downPawsI(i),1:2)),2);
@@ -63,6 +65,14 @@ function [TrBrBlTl] = findRelativePositions(pawCenters)
             else
                 TrBrBlTl(3,:) = pawCenters(i,:);
             end
+        end
+    end
+end
+
+function pawCenter = zeroDuplicatePoint(pawCenter)
+    for i = 1:4
+        if sum(~sum(pawCenter(:,1:2)-pawCenter(i,1:2), 2)) > 1
+            pawCenter(i,:) = 0;
         end
     end
 end
