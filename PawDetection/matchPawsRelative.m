@@ -6,7 +6,7 @@ function [pawCenters] = matchPawsRelative(Images, pawCenters)
                 relativePositions = findRelativePositions(pawCenters(:,:,k));
                  %relativePositions = [Top Right; Bottom Right; Bottom Left; Top Left]
                  %Paws = ['FR';'FL';'BL';'BR'];
-                mapping = [4, 2, 3, 1]; 
+                mapping = [4, 3, 2, 1]; 
                 pawCenters(:,:,k) = relativePositions(mapping,:);
                 argFourPaws(end+1) = k;
         end

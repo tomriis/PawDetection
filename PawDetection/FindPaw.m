@@ -67,10 +67,10 @@ if UsePC
     if tooBig(2)
         Box(2,2) = ImSize(2);
     end
-    Box(1,1) = 50; % TODO: create manual step to isolate appropriate search area
+    Box(1,1) = 90; % TODO: create manual step to isolate appropriate search area
     Box(1,2) = 380;
     Box(2,1) = 1;
-    Box(2,2) = 470;
+    Box(2,2) = 450;
     UseImage = Image(Box(1,1):Box(1,2),Box(2,1):Box(2,2),:);
     % Now, before we take this massaged image, full of highlit pixels that
     % hopefully include the pays, and send it to the cluster finder, let's

@@ -1,7 +1,7 @@
 function [pawPoints]=ShowPawPlacement(Images, pawCenters, imNum)
     pawPoints = cell(1,4);
-    pawLabel={'FL','FR','BL','BR'};
-
+    pawLabel={'FR','FL','BL','BR'};
+    
     imshow(Images(:,:,:,imNum)); hold on;
     
     for i = 1:4
