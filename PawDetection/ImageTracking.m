@@ -154,7 +154,6 @@ if pawsDone < numIn
         % from which to draw information. Otherwise, we'll just keep
         % advancing through the frames until all four paws are finally
         % down.
-
         if Initialize
             % Now we have to identify which paws are which. We have a good hint
             % already if the paw showed up in the place that we would expect it to
@@ -207,6 +206,7 @@ else
 end
 pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) = pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) + lowestRow;
 pawCenters(Zeros) = 0;
+pawCenters = matchPawsRelative(pawCenters);
 
 %clc
 disp('Files are 100% Processed');
