@@ -23,13 +23,31 @@ end
 function ManualOversightGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to ManualOversightGUI (see VARARGIN)
-handles.Images = varargin{1};
-handles.pawCenters = varargin{2};
-handles.imNum = 1;
+
+p = inputParser;
+addOptional(p,'input',0, @(x) isstruct(x));
+addOptional(p,'Images', 0, @(x) isnumeric(x));
+addOptional(p, 'pawCenters', 0, @(x) isnumeric(x));
+addOptional(p, 'imNum',1, @(x) isnumeric(x));
+parse(p, varargin{:})
+
+if isstruct(p.Results.input)
+    handles.Images = p.Results.input.Images;
+    handles.pawCenters = p.Results.input.pawCenters;
+  
+end
+if size(p.Results.Images,1) > 1
+    handles.Images = p.Results.Images;
+end
+if size(p.Results.pawCenters,1) > 1
+    handles.pawCenters = p.Results.pawCenters;
+end
+handles.imNum = p.Results.imNum;
+
 % Update handles structure
 guidata(hObject, handles);
 ShowPawPlacement(handles.Images, handles.pawCenters, handles.imNum);
-setappdata(hObject, 'pawCenters1', handles.pawCenters);
+disp(strcat('Viewing image--',num2str(handles.imNum)))
 % UIWAIT makes ManualOversightGUI wait for user response (see UIRESUME)
 uiwait(handles.figure1);
 
