@@ -3,7 +3,11 @@ function [ pointArray ] = AddInfo( pointArray,Radius,Image,ImNum,numPoints )
 %it slightly in order to fit into the official pawCenters variable.
 
 for k = 1:numPoints
-    Paw = GetObj(Image,pointArray(k,1:2,ImNum),Radius);
+    try
+        Paw = GetObj(Image,pointArray(k,1:2,ImNum),Radius);
+    catch e
+        warning(strcat('Image',{' '},num2str(ImNum),{': '},string(e.identifier),{' --- '},string(e.message)));
+    end
     PawBr = mean(Paw,3);
     PawStats = [mean2(PawBr),std2(PawBr)];
     pointArray(k,3:4,ImNum) = PawStats;

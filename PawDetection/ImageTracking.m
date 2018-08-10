@@ -50,6 +50,8 @@ bestMean = 0;
 Counter = 0;
 resetThresh = 0.5;
 ledsDone = find(sum(sum(ledCenters)),1,'last');
+numIts = 1;
+Disaster = 0;
 if(isempty(ledsDone))
     ledsDone = 0;
 end
@@ -114,9 +116,6 @@ if pawsDone < numIn
     % We use a while loop so we can redo incorrect iterations.
     while k <= numIn
         Image = Images(lowestRow:end,:,:,k);
-        if k == 27
-            a=5;
-        end
         % This just measures the progress and updates the user.
         if 100*k/numIn >= nextGoal
             disp(strcat(['Paws are ',num2str(nextGoal),'% Processed']));
@@ -126,21 +125,15 @@ if pawsDone < numIn
         % for paws in this image.
         if resetCol == 1
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
-                FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp);
-            if ~Initialize
-                numPawsFound = sum(pawCenters(:,1,k) > 0);
-                if numPawsFound == 4
-                    Initialize = 1;
-                else
-                    pawCenters(:,:,k) = 0;
-                    resetCol = 0;
-                end
-            end
+                FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp, Params);
+            Params{1}=bght_thresh;
+            Params{2}=cRatios;
+            Initialize = 1;
         else
             disp(strcat(['On ','image ', num2str(k)]))
             [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
                 FindPaw(Image,pawRadius,colorChan(2), ...
-                resetCol,k,pawCenters,linDisp,cRatios,bght_thresh);
+                resetCol,k,pawCenters,linDisp,Params);
             if ~Initialize
                 numPawsFound = sum(pawCenters(:,1,k) > 0);
                 if numPawsFound == 4
@@ -155,44 +148,9 @@ if pawsDone < numIn
         % advancing through the frames until all four paws are finally
         % down.
         if Initialize
-            % Now we have to identify which paws are which. We have a good hint
-            % already if the paw showed up in the place that we would expect it to
-            % be if it were stationary.
-            [pawCenters,resetCol,Disaster] = AddPaws(k,pawCenters,pawRadius,Image,resetCol);
-            % The rest of the code is meant to catch errors and inform the next
-            % iteration that it needs to try again with the same image.
-            [resetCol,Disaster,pawCenters] = AssessValidity(pawCenters,k,resetCol,Disaster);
-            AskAbout = pawCenters(:,12,k);
-            if sum(AskAbout > 0)
-                offset = [lowestRow,0];
-                pawCenters = ManualPlace(Images,pawCenters,k,offset);
-            end
-            if Disaster
-                disp('Disaster Invoked')
-                k = k - 1;
-                resetCol = 1;
-                numIts = numIts + 1;
-                if numIts > 5
-                    resetCol = 0;
-                    k = k + 1;
-                    numIts=1;
-                end
-            end
-            if Counter == 0
-                bestMean = [median(meanMax),max(meanMax)];
-                Counter = 1;
-            end
-            if median(meanMax) < resetThresh*bestMean(1) && max(meanMax) < 0.9*bestMean(2)
-                resetCol = 0;
-                Counter = 0;
-            end
-            if ~Disaster && ~resetCol
-                numIts = 1;
-            end            
+            resetCol = 0;
         end
-        if AlwaysAsk
-            pawCenters = AskUser(Image,pawCenters,k);
-        end
+            
         k = k + 1;
     end
 end
@@ -206,8 +164,25 @@ else
 end
 pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) = pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) + lowestRow;
 pawCenters(Zeros) = 0;
-pawCenters = matchPawsRelative(pawCenters);
 
+pawCenters = matchPawsRelative(pawCenters);
+disaster_idx = [];
+for i = 1:numIn
+    try
+        [pawCenters,resetCol,Disaster] = AddPaws(i,pawCenters,pawRadius,Image,resetCol);
+        [resetCol,Disaster,pawCenters] = AssessValidity(pawCenters,i,resetCol,Disaster);
+        if Disaster || mean2(pawCenters(:,1:2,i))==0
+            disaster_idx(end+1) = i;
+        end
+     catch e
+        warning(strcat('Image',{' '},num2str(i),{': '},string(e.identifier),{' -- '},string(e.message)));
+        disaster_idx(end+1) = i;
+    end
+end
+disp('________________________________')
+disp('Found issues with images:');
+disp(disaster_idx);
+disp('________________________________')
 %clc
 disp('Files are 100% Processed');
 

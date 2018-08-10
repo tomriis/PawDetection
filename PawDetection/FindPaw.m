@@ -1,4 +1,4 @@
-function [ Image,pawCenters,cRatios,bght_thresh,globMax ] = FindPaw( Image,pawRadius,colorChan,resetCol,ImNum,pawCenters,linDisp,cRatios,bght_thresh)
+function [ Image,pawCenters,cRatios,bght_thresh,globMax ] = FindPaw( Image,pawRadius,colorChan,resetCol,ImNum,pawCenters,linDisp,Params)
 %This function is meant to find the rat's paws. It includes the code to
 %reset the color ratios if necessary.
 %   cRatios is a 2 x 1 matrix. The top number is the expected ratio of the
@@ -18,6 +18,9 @@ addIfUp = 100;
 ImSize = size(Image);
 ImSize(3) = [];
 midCol = ImSize(2)/2;
+bght_thresh = Params{1};
+cRatios = Params{2};
+
 if ImNum > 1
     UsePC = logical(mean2(pawCenters(:,:,ImNum-1)));
 else

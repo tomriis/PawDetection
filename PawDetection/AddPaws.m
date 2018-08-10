@@ -56,11 +56,17 @@ pawCenters = AddInfo(pawCenters,Radius,Image,ImNum,numVisPaws);
 % It is important that the order of pointArray always remain [FL;FR;BL;BR].
 % This is the code that establishes these relationships. It requires that
 % all four paws be present in the image to guarantee accuracy.
+resetCol = 0;
+numPawsIn = sum(pawCenters(:,1,ImNum) > 0);
 if resetPawIDs
-    pawCenters(:,:,ImNum) = UseStats(pawCenters(:,:,ImNum),Image);
+    if numPawsIn == 4
+        pawCenters(:,:,ImNum) = UseStats(pawCenters(:,:,ImNum),Image);
+    else
+        return
+    end
 end
 
-resetCol = 0;
+
 
 % This next batch of code checks where the paws picked up, if any appear to
 % be up at all, and places that stat in the appropriate column (5). 
@@ -77,7 +83,7 @@ end
 % to the pawCenters array.
 % Let's start by checking that all four paws are down. If not, we really
 % can't determine body angle in this frame with precision.
-numPawsIn = sum(pawCenters(:,1,ImNum) > 0);
+
 if numPawsIn == 4
     FrontRows = pawCenters([1,2],1,ImNum);
     FrontCols = pawCenters([1,2],2,ImNum);
