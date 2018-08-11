@@ -5,6 +5,8 @@ imSize = size(Images);
 h = figure;
 imshow(Images(:,:,:,1));
 line = imline(gca, [-100, default; imSize(2)+100,default]);
+id = addNewPositionCallback(line,@(pos) title(mat2str(pos(1,2),3)));
+title(num2str(default,3));
 while true
     w = waitforbuttonpress;
     if w==1
