@@ -79,7 +79,13 @@ elseif pawsDone > 0
     end
 end
 
-if ~Params{3}
+if Params{3}
+    linDisp = ones(1,numIn);
+    lowestRow = 1;
+    if length(Params)<4
+        Params{4} = 0;
+    end
+else
     % This is the whole LED section. The paws finding algorithm needs to know
     % this information to search more accurately.
     if ledsDone < numIn
@@ -98,9 +104,6 @@ if ~Params{3}
     end
     linDisp = ledAnalyze(ledCenters);
     lowestRow = max(max(ledCenters(:,1)));
-else
-    linDisp = ones(1,numIn);
-    lowestRow = 100;
 end
 % We assume that the LEDs found the same low row for our purposes
 if alreadyOffset
@@ -124,12 +127,10 @@ if pawsDone < numIn
         % This simple 'if' clause is used to find the most likely candidates
         % for paws in this image.
         if resetCol == 1
-            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
+            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax, Params] = ...
                 FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp, Params);
             if Params{3}
-                Initialize = 1;
-                Params{1}=bght_thresh;
-                Params{2}=cRatios;
+                Initialize = 1; 
             else
                 if ~Initialize
                     numPawsFound = sum(pawCenters(:,1,k) > 0);
@@ -143,7 +144,7 @@ if pawsDone < numIn
             end
         else
             disp(strcat(['On ','image ', num2str(k)]))
-            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
+            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax, Params] = ...
                 FindPaw(Image,pawRadius,colorChan(2), ...
                 resetCol,k,pawCenters,linDisp,Params);
             if ~Initialize
@@ -160,7 +161,7 @@ if pawsDone < numIn
         % advancing through the frames until all four paws are finally
         % down.
         if Initialize
-            if Param{3}
+            if Params{3}
                 resetCol = 0;
             else
                 % Now we have to identify which paws are which. We have a good hint

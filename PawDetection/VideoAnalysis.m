@@ -65,8 +65,8 @@ function [ varargout ] = VideoAnalysis( Frames,varargin )
 %   Params
 %       Params{1} = bght_thresh;
 %       Params{2} = cRatios;
-%       Params{3} = skipLEDs;  
-%
+%       Params{3} = skipLEDs;
+%       Params{4} = Find Paw Search Area: 2x2 matrix
 
 % First we parse the optional inputs.
 if ~mod(nargin,2)
