@@ -189,6 +189,7 @@ if earlyQuit
 end
 
 %pawCenters = ManualPlace(Images,pawCenters,numAn);
+try
 FauxPCs = InterpolatePaws(pawCenters);
 save('R08170817_1_1000','ledCenters','pawCenters','FauxPCs');
 
@@ -197,6 +198,9 @@ ledDiam = 0.55; % cm
 ArcLength = 36.6; % cm
 
 [Data] = AnalyzeCens(FauxPCs,ledCenters,numAn);
+catch
+    warning('Failed to InterpolatePaws');
+end
 
 
 

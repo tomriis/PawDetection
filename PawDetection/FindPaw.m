@@ -91,23 +91,26 @@ end
 
 if Params{3}
     if ImNum == 1 && resetCol
+        disp('FInding color rations')
         UseImage = Image;
         notOne = 0;
         expPaws = 0;
         if Params{4} == 0
             % Have gui ask user to select or type in search area
             % coordinates
-            Params{4} = GetSearchAreaUI(Image);
+            x1 = 1;
+            y1 = 90;
+            x2 = 450;
+            y2 = 380;
+            default = [x1 y1 x2-x1 y2-y1];
+            Params{4} = GetSearchAreaUI(Image, default);
         end
         
     else
-    Box(1,1) = 90; % TODO: create manual step to isolate appropriate search area
-    Box(1,2) = 380;
-    Box(2,1) = 1;
-    Box(2,2) = 450;
         Box = Params{4};
         UseImage = Image(Box(1,1):Box(1,2),Box(2,1):Box(2,2),:);
         notOne = 1;
+        expPaws = 0;
     end
 end
 % The bright edges confuse the finding algorithm, and they seem to be

@@ -81,7 +81,7 @@ end
 
 if Params{3}
     linDisp = ones(1,numIn);
-    lowestRow = 1;
+    lowestRow = 100;
     if length(Params)<4
         Params{4} = 0;
     end
@@ -89,7 +89,7 @@ else
     % This is the whole LED section. The paws finding algorithm needs to know
     % this information to search more accurately.
     if ledsDone < numIn
-        for k = ledsDone + 1:numIn;
+        for k = ledsDone + 1:numIn
             if 100*k/numIn >= nextGoal
                 disp(strcat(['LEDs are ',num2str(nextGoal),'% Processed']));
                 nextGoal = nextGoal + 10;
@@ -162,6 +162,14 @@ if pawsDone < numIn
         % down.
         if Initialize
             if Params{3}
+                if resetCol == 1
+                %needed to redo paw selection with smaller window after it finds Color ratios
+                %and bght_thresh
+                disp('here in redo')
+                pawCenters(:,:,k) = 0;
+                    [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax, Params] = ...
+                FindPaw(Image,pawRadius,colorChan(2),0,k,pawCenters,linDisp,Params);
+                end
                 resetCol = 0;
             else
                 % Now we have to identify which paws are which. We have a good hint
