@@ -81,7 +81,7 @@ end
 
 if Params{3}
     linDisp = ones(1,numIn);
-    lowestRow = 100;
+    lowestRow = GetLowestRowUI(Images, 100);
     if length(Params)<4
         Params{4} = 0;
     end
