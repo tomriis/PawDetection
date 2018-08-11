@@ -1,4 +1,4 @@
-function [ Image,pawCenters,cRatios,bght_thresh,globMax ] = FindPaw( Image,pawRadius,colorChan,resetCol,ImNum,pawCenters,linDisp,cRatios,bght_thresh)
+function [ Image,pawCenters,cRatios,bght_thresh,globMax, Params ] = FindPaw( Image,pawRadius,colorChan,resetCol,ImNum,pawCenters,linDisp,Params)
 %This function is meant to find the rat's paws. It includes the code to
 %reset the color ratios if necessary.
 %   cRatios is a 2 x 1 matrix. The top number is the expected ratio of the
@@ -18,6 +18,9 @@ addIfUp = 100;
 ImSize = size(Image);
 ImSize(3) = [];
 midCol = ImSize(2)/2;
+bght_thresh = Params{1};
+cRatios = Params{2};
+
 if ImNum > 1
     UsePC = logical(mean2(pawCenters(:,:,ImNum-1)));
 else
@@ -67,11 +70,6 @@ if UsePC
     if tooBig(2)
         Box(2,2) = ImSize(2);
     end
-    Box(1,1) = 90; % TODO: create manual step to isolate appropriate search area
-    Box(1,2) = 380;
-    Box(2,1) = 1;
-    Box(2,2) = 450;
-    UseImage = Image(Box(1,1):Box(1,2),Box(2,1):Box(2,2),:);
     % Now, before we take this massaged image, full of highlit pixels that
     % hopefully include the pays, and send it to the cluster finder, let's
     % give that function a head start and let it know where the paws were
@@ -85,13 +83,36 @@ if UsePC
     rowCVec = adjRows(lastPaws,midCol);
     expPaws(:,1) = expPaws(:,1) - Box(1,1) + rowCVec;
     expPaws(Zeros) = 0;
-    expPaws = 0;
 else
     UseImage = Image;
     notOne = 0;
     expPaws = 0;
 end
 
+if Params{3}
+    if ImNum == 1 && resetCol
+        disp('FInding color rations')
+        UseImage = Image;
+        notOne = 0;
+        expPaws = 0;
+        if Params{4} == 0
+            % Have gui ask user to select or type in search area
+            % coordinates
+            x1 = 1;
+            y1 = 90;
+            x2 = 450;
+            y2 = 380;
+            default = [x1 y1 x2-x1 y2-y1];
+            Params{4} = GetSearchAreaUI(Image, default);
+        end
+        
+    else
+        Box = Params{4};
+        UseImage = Image(Box(1,1):Box(1,2),Box(2,1):Box(2,2),:);
+        notOne = 1;
+        expPaws = 0;
+    end
+end
 % The bright edges confuse the finding algorithm, and they seem to be
 % pretty constant. So I'm reducing them, and hoping for the best. In the
 % future, these cut values may be informed by where the paws have been
@@ -136,6 +157,8 @@ if resetCol
     [~,Max2] = max(Scores(2,:));
     cRatios = [scanVals(Max1);scanVals(Max2)];
     disp('Color ratios have been reset');
+    Params{1}=bght_thresh;
+    Params{2}=cRatios;
 end
 
 hits = false([UseImSize,4]);

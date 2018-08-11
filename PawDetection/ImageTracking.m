@@ -50,6 +50,8 @@ bestMean = 0;
 Counter = 0;
 resetThresh = 0.5;
 ledsDone = find(sum(sum(ledCenters)),1,'last');
+numIts = 1;
+Disaster = 0;
 if(isempty(ledsDone))
     ledsDone = 0;
 end
@@ -77,11 +79,17 @@ elseif pawsDone > 0
     end
 end
 
-if ~Params{3}
+if Params{3}
+    linDisp = ones(1,numIn);
+    lowestRow = GetLowestRowUI(Images, 100);
+    if length(Params)<4
+        Params{4} = 0;
+    end
+else
     % This is the whole LED section. The paws finding algorithm needs to know
     % this information to search more accurately.
     if ledsDone < numIn
-        for k = ledsDone + 1:numIn;
+        for k = ledsDone + 1:numIn
             if 100*k/numIn >= nextGoal
                 disp(strcat(['LEDs are ',num2str(nextGoal),'% Processed']));
                 nextGoal = nextGoal + 10;
@@ -96,9 +104,6 @@ if ~Params{3}
     end
     linDisp = ledAnalyze(ledCenters);
     lowestRow = max(max(ledCenters(:,1)));
-else
-    linDisp = ones(1,numIn);
-    lowestRow = 100;
 end
 % We assume that the LEDs found the same low row for our purposes
 if alreadyOffset
@@ -114,9 +119,6 @@ if pawsDone < numIn
     % We use a while loop so we can redo incorrect iterations.
     while k <= numIn
         Image = Images(lowestRow:end,:,:,k);
-        if k == 27
-            a=5;
-        end
         % This just measures the progress and updates the user.
         if 100*k/numIn >= nextGoal
             disp(strcat(['Paws are ',num2str(nextGoal),'% Processed']));
@@ -125,22 +127,26 @@ if pawsDone < numIn
         % This simple 'if' clause is used to find the most likely candidates
         % for paws in this image.
         if resetCol == 1
-            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
-                FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp);
-            if ~Initialize
-                numPawsFound = sum(pawCenters(:,1,k) > 0);
-                if numPawsFound == 4
-                    Initialize = 1;
-                else
-                    pawCenters(:,:,k) = 0;
-                    resetCol = 0;
+            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax, Params] = ...
+                FindPaw(Image,pawRadius,colorChan(2),resetCol,k,pawCenters,linDisp, Params);
+            if Params{3}
+                Initialize = 1; 
+            else
+                if ~Initialize
+                    numPawsFound = sum(pawCenters(:,1,k) > 0);
+                    if numPawsFound == 4
+                        Initialize = 1;
+                    else
+                        pawCenters(:,:,k) = 0;
+                        resetCol = 0;
+                    end
                 end
             end
         else
             disp(strcat(['On ','image ', num2str(k)]))
-            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax] = ...
+            [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax, Params] = ...
                 FindPaw(Image,pawRadius,colorChan(2), ...
-                resetCol,k,pawCenters,linDisp,cRatios,bght_thresh);
+                resetCol,k,pawCenters,linDisp,Params);
             if ~Initialize
                 numPawsFound = sum(pawCenters(:,1,k) > 0);
                 if numPawsFound == 4
@@ -155,43 +161,56 @@ if pawsDone < numIn
         % advancing through the frames until all four paws are finally
         % down.
         if Initialize
-            % Now we have to identify which paws are which. We have a good hint
-            % already if the paw showed up in the place that we would expect it to
-            % be if it were stationary.
-            [pawCenters,resetCol,Disaster] = AddPaws(k,pawCenters,pawRadius,Image,resetCol);
-            % The rest of the code is meant to catch errors and inform the next
-            % iteration that it needs to try again with the same image.
-            [resetCol,Disaster,pawCenters] = AssessValidity(pawCenters,k,resetCol,Disaster);
-            AskAbout = pawCenters(:,12,k);
-            if sum(AskAbout > 0)
-                offset = [lowestRow,0];
-                pawCenters = ManualPlace(Images,pawCenters,k,offset);
-            end
-            if Disaster
-                disp('Disaster Invoked')
-                k = k - 1;
-                resetCol = 1;
-                numIts = numIts + 1;
-                if numIts > 5
+            if Params{3}
+                if resetCol == 1
+                %needed to redo paw selection with smaller window after it finds Color ratios
+                %and bght_thresh
+                disp('here in redo')
+                pawCenters(:,:,k) = 0;
+                    [Images(lowestRow:end,:,:,k),pawCenters,cRatios,bght_thresh,meanMax, Params] = ...
+                FindPaw(Image,pawRadius,colorChan(2),0,k,pawCenters,linDisp,Params);
+                end
+                resetCol = 0;
+            else
+                % Now we have to identify which paws are which. We have a good hint
+                % already if the paw showed up in the place that we would expect it to
+                % be if it were stationary.
+                [pawCenters,resetCol,Disaster] = AddPaws(k,pawCenters,pawRadius,Image,resetCol);
+                % The rest of the code is meant to catch errors and inform the next
+                % iteration that it needs to try again with the same image.
+                [resetCol,Disaster,pawCenters] = AssessValidity(pawCenters,k,resetCol,Disaster);
+                AskAbout = pawCenters(:,12,k);
+                if sum(AskAbout > 0)
+                    offset = [lowestRow,0];
+                    pawCenters = ManualPlace(Images,pawCenters,k,offset);
+                end
+                if Disaster
+                    disp('Disaster Invoked')
+                    k = k - 1;
+                    resetCol = 1;
+                    numIts = numIts + 1;
+                    if numIts > 5
+                        resetCol = 0;
+                        k = k + 1;
+                        numIts=1;
+                    end
+                end
+                if Counter == 0
+                    bestMean = [median(meanMax),max(meanMax)];
+                    Counter = 1;
+                end
+                if median(meanMax) < resetThresh*bestMean(1) && max(meanMax) < 0.9*bestMean(2)
                     resetCol = 0;
-                    k = k + 1;
-                    numIts=1;
+                    Counter = 0;
+                end
+                if ~Disaster && ~resetCol
+                    numIts = 1;
+                end            
+           
+                if AlwaysAsk
+                    pawCenters = AskUser(Image,pawCenters,k);
                 end
             end
-            if Counter == 0
-                bestMean = [median(meanMax),max(meanMax)];
-                Counter = 1;
-            end
-            if median(meanMax) < resetThresh*bestMean(1) && max(meanMax) < 0.9*bestMean(2)
-                resetCol = 0;
-                Counter = 0;
-            end
-            if ~Disaster && ~resetCol
-                numIts = 1;
-            end            
-        end
-        if AlwaysAsk
-            pawCenters = AskUser(Image,pawCenters,k);
         end
         k = k + 1;
     end
@@ -207,6 +226,23 @@ end
 pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) = pawCenters(:,1,pawsDone + numAn(1) + Mod:numAn(2)) + lowestRow;
 pawCenters(Zeros) = 0;
 pawCenters = matchPawsRelative(pawCenters);
+disaster_idx = [];
+for i = 1:numIn
+    try
+        [pawCenters,resetCol,Disaster] = AddPaws(i,pawCenters,pawRadius,Image,resetCol);
+        [resetCol,Disaster,pawCenters] = AssessValidity(pawCenters,i,resetCol,Disaster);
+        if Disaster || mean2(pawCenters(:,1:2,i))==0
+            disaster_idx(end+1) = i;
+        end
+     catch e
+        warning(strcat('Image',{' '},num2str(i),{': '},string(e.identifier),{' -- '},string(e.message)));
+        disaster_idx(end+1) = i;
+    end
+end
+disp('________________________________')
+disp('Found issues with images:');
+disp(disaster_idx);
+disp('________________________________')
 
 %clc
 disp('Files are 100% Processed');
@@ -216,4 +252,3 @@ Params{1} = bght_thresh;
 Params{2} = cRatios;
 
 end
-

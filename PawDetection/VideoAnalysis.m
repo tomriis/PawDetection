@@ -65,8 +65,8 @@ function [ varargout ] = VideoAnalysis( Frames,varargin )
 %   Params
 %       Params{1} = bght_thresh;
 %       Params{2} = cRatios;
-%       Params{3} = skipLEDs;  
-%
+%       Params{3} = skipLEDs;
+%       Params{4} = Find Paw Search Area: 2x2 matrix
 
 % First we parse the optional inputs.
 if ~mod(nargin,2)
@@ -189,6 +189,7 @@ if earlyQuit
 end
 
 %pawCenters = ManualPlace(Images,pawCenters,numAn);
+try
 FauxPCs = InterpolatePaws(pawCenters);
 save('R08170817_1_1000','ledCenters','pawCenters','FauxPCs');
 
@@ -197,6 +198,9 @@ ledDiam = 0.55; % cm
 ArcLength = 36.6; % cm
 
 [Data] = AnalyzeCens(FauxPCs,ledCenters,numAn);
+catch
+    warning('Failed to InterpolatePaws');
+end
 
 
 

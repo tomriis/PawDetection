@@ -1,4 +1,4 @@
-function [pawCenters] = matchPawsRelative(pawCenters)
+function [pawCenters, argFourPaws] = matchPawsRelative(pawCenters)
     argFourPaws = [];
     for k = 1:size(pawCenters,3)
         numPawsFound = sum(pawCenters(:,1,k)>0 & pawCenters(:,2,k)>0);
@@ -29,14 +29,32 @@ function [pawCenters] = matchByDistance(pawCenters, k, argFourPaws)
     pawCenters(downPawsI,:, k) = 0;
     
     distances = zeros(4, size(argFourPaws,2));
+    weights = weightFunction(argFourPaws, k, 'linear');
     for i=1:size(downPawsI,2)
         for j = 1:size(argFourPaws,2)
             distances(:,j) = sum(abs(pawCenters(:,1:2,argFourPaws(j)) - pawCenter(downPawsI(i),1:2)),2);
         end
-        [~, argmin] = min(sum(distances,2));
+        [~, argmin] = min(sum(weights.*distances,2));
         pawCenters(argmin,:,k) = pawCenter(downPawsI(i),:);
     end
 end
+
+function [weights] = weightFunction(argFourPaws, imNum, method)
+    numFourPaws = size(argFourPaws,2);
+    weights = ones(1, numFourPaws);
+    if strcmp(method, 'nearestNeighbor')
+        neighborsBefore = 10;
+        neighborsAfter = 10;
+        argsBefore = argFourPaws < imNum - neighborsBefore;
+        argsAfter = argFourPaws > imNum + neighborsAfter;
+        outOfRange = or(argsBefore, argsAfter);
+        weights(outOfRange) = 0;
+    elseif strcmp(method, 'linear')
+        diff = abs(argFourPaws - imNum);
+        weights = weights./diff;
+    end 
+end
+
 
 function [TrBrBlTl] = findRelativePositions(pawCenters)
     TrBrBlTl = zeros(size(pawCenters));
