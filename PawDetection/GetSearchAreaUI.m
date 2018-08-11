@@ -17,7 +17,6 @@ function [Box] = GetSearchAreaUI(Image, varargin)
     if response == 'y' || response == 'Y'
         positions = zeros(1,4);
         position = rect.getPosition();
-        disp(position)
         positions(1) = position(1);
         positions(2) = position(2);
         positions(3) = position(1)+position(3);
