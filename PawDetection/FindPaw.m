@@ -117,7 +117,11 @@ end
 % pretty constant. So I'm reducing them, and hoping for the best. In the
 % future, these cut values may be informed by where the paws have been
 % found.
-meanIm = mean(UseImage,3);
+try
+    meanIm = mean(UseImage,3);
+catch
+    meanIm = 0.5;
+end
 UseImSize = size(UseImage);
 UseImSize(3) = [];
 

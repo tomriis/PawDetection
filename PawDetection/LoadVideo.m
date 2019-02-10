@@ -11,13 +11,14 @@ end
 if sum(Analyze) == 0
    Analyze = [1,size(S,1)];
 end
-numLoads = Analyze(2)-Analyze(1)+1;
 
 lookFor = 1;
 imageStart = 0;
-while lookFor
+filename = C{1,1};
+while lookFor || strcmp('.',filename(1))
     imageStart = imageStart + 1;
     lookFor = C{5,imageStart};
+    filename = C{1,imageStart};
 end
 % imageStart will now tell you where the isdir field becomes zero.
 %if mean(Analyze) == 0
@@ -29,20 +30,30 @@ end
 cd(framesDir);
 Test = imread(C{1,imageStart});
 Sizes = size(Test);
-%Sizes(4) = numLoads;
 Sizes(4) = numImages;
+if Sizes(3) == 0 %Black and white images
+    Sizes(3) = 3;
+    black_white_image = 1;
+else
+    black_white_image = 0;
+end
 Images = zeros(Sizes,'uint8');
 Ind = Analyze(1);
 nextGoal = 10;
-%for k = 1:numLoads
-%    if 100*k/numLoads > nextGoal
+
 for k = 1:numImages
     if 100*k/numImages > nextGoal
         disp(strcat(['Files are ',num2str(nextGoal),'% Loaded']));
         nextGoal = nextGoal + 10;
     end
     disp(Ind+imageStart)
-    Images(:,:,:,k) = imread(C{1,Ind+imageStart-1});
+    if black_white_image
+        Images(:,:,1,k) = imread(C{1,Ind+imageStart-1});
+        Images(:,:,2,k) = imread(C{1,Ind+imageStart-1});
+        Images(:,:,3,k) = imread(C{1,Ind+imageStart-1});
+    else
+        Images(:,:,:,k) = imread(C{1,Ind+imageStart-1});
+    end
     Ind = Ind + 1;
 end
 clc
